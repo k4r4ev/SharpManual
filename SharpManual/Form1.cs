@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
+using Microsoft.Office.Interop.Excel;
 
 namespace SharpManual
 {
@@ -16,6 +17,19 @@ namespace SharpManual
         private int RowId;
         Microsoft.Office.Interop.Word.Application wordApp;
         Microsoft.Office.Interop.Word.Document wordDoc;
+
+        //объект приложения
+        Microsoft.Office.Interop.Excel.Application ExcelApp;
+        //объект окна Excel 
+        Microsoft.Office.Interop.Excel.Window ExcelWindow;
+        //объект рабочей книги
+        Microsoft.Office.Interop.Excel.Workbook WorkBook;
+        //набор листов Excel
+        Microsoft.Office.Interop.Excel.Sheets ExcelSheets;
+        //объект рабочего листа
+        Microsoft.Office.Interop.Excel.Worksheet WorkSheet;
+        //диапазон ячеек
+        Microsoft.Office.Interop.Excel.Range range;
 
         public Form1()
         {
@@ -31,9 +45,13 @@ namespace SharpManual
             // TODO: данная строка кода позволяет загрузить данные в таблицу "databaseDataSet1.methods". При необходимости она может быть перемещена или удалена.
             this.methodsTableAdapter.Fill(this.databaseDataSet1.methods);
 
-            oleDbConnection1.Open(); //открыть соединение
-            UpdateTables();        //обновить главное окно
+            oleDbDataAdapter1.Fill(databaseDataSet.methods);
+            oleDbDataAdapter1.Fill(databaseDataSet.classes);
+            oleDbDataAdapter1.Fill(databaseDataSet.spaces);
 
+            oleDbConnection1.Open(); //открыть соединение
+
+            UpdateTables();        //обновить главное окно
         }
 
         private void UpdateTables()
@@ -398,12 +416,10 @@ namespace SharpManual
             //запускаем процесс поиска и замены
             ExecuteReplace(fnd);
         }
-
         private Boolean ExecuteReplace(Microsoft.Office.Interop.Word.Find find)
         {
             return ExecuteReplace(find, Microsoft.Office.Interop.Word.WdReplace.wdReplaceAll);
         }
-
         private Boolean ExecuteReplace(Microsoft.Office.Interop.Word.Find find, Object replaceOption)
         {
             Object findText = Type.Missing;
@@ -428,7 +444,6 @@ namespace SharpManual
             ref replaceWith, ref replace, ref matchKashida,
             ref matchDiacritics, ref matchAlefHamza, ref matchControl);
         }
-
         private void InvitationButton_Click(object sender, EventArgs e)
         {
             //если выбран человек для формирования приглашения
@@ -458,7 +473,6 @@ namespace SharpManual
             else
                 MessageBox.Show("Выберите метод", "Ошибка");
         }
-
         private void NumbersButton_Click(object sender, EventArgs e)
         {
             //создаем новый документ на основе шаблона
@@ -527,5 +541,110 @@ namespace SharpManual
         }
 
 
+
+
+
+        // EXCEL
+        private void OpenExcelDocument(string FileName)
+        {
+            //создать новый объект приложения Excel
+            ExcelApp = new Microsoft.Office.Interop.Excel.Application();
+            //задать файл шаблона
+            Object template = System.Windows.Forms.Application.StartupPath + @"\docs\" + FileName;
+            //применить шаблон
+            ExcelApp.Workbooks.Add(template);
+            //получить первую рабочую книгу файла
+            WorkBook = ExcelApp.Workbooks[1];
+            //получить список листов рабочей книги
+            ExcelSheets = WorkBook.Worksheets;
+            //выбрать первый лист
+            WorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)ExcelSheets.get_Item(1);
+        }
+        private void PutCell(string cell, string val)
+        {
+            //получить диапазон, соответствующий выбранной ячейке
+            range = WorkSheet.get_Range(cell, Type.Missing);
+            //занести в ячейку значение
+            range.Value2 = val;
+        }
+        private void PutCellBorder(string cell, string val)
+        {
+            //вызвать функцию занесения в ячейку значения
+            PutCell(cell, val);
+            //нарисовать границу вокруг ячейки
+            range.BorderAround(Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous, Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin, Microsoft.Office.Interop.Excel.XlColorIndex.xlColorIndexAutomatic, Type.Missing);
+        }
+        private void ExcelButton_Click(object sender, EventArgs e)
+        {
+            //создать документ на основе шаблона
+            OpenExcelDocument("Sheets1.xlsx");
+            //занести текущую дату в ячейку D1
+            PutCell("D1", DateTime.Now.ToShortDateString());
+            //i - порядковый номер записи
+            int i = 1;
+            //просмотреть все строки таблицы Methods
+            foreach (DataRow row in databaseDataSet1.methods)
+            {
+                PutCellBorder("B" + (i + 5).ToString(), row["Код"].ToString());
+                PutCellBorder("C" + (i + 5).ToString(), row["Название"].ToString());
+                PutCellBorder("D" + (i + 5).ToString(), row["Описание"].ToString());
+                i++;
+            }
+
+            //сделать приложение Excel видимым
+            ExcelApp.Visible = true;
+        }
+        private void ExcelButton2_Click(object sender, EventArgs e)
+        {
+            //создать документ на основе шаблона
+            OpenExcelDocument("Sheets1.xlsx");
+            //занести текущую дату в ячейку D1
+            PutCell("D1", DateTime.Now.ToShortDateString());
+            int i = 6;
+            //просмотреть все строки таблицы Classes
+            foreach (DataRow row in databaseDataSet.classes)
+            {
+                //MessageBox.Show("Выберите метод", "Ошибка");
+                //занести в столбец А название класса
+                PutCell("A" + i.ToString(), row["Название"].ToString());
+                //выделить ячейки с А по D
+                range = WorkSheet.get_Range("A" + i.ToString(), "C" + i.ToString());
+                //и объединить их
+                range.Merge(Type.Missing);
+                //установить жирный шрифт
+                range.Font.Bold = true;
+                //и курсив
+                range.Font.Italic = true;
+                //нарисовать границу вокруг ячейки
+                range.BorderAround(Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous, Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin, Microsoft.Office.Interop.Excel.XlColorIndex.xlColorIndexAutomatic, Type.Missing);
+                //установить выравнивание по центру
+                range.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                //получить список телефонов по заданному классу
+                DataRow[] methods = row.GetChildRows(databaseDataSet.Relations["КлассыМетоды"]);
+                i++;
+                //num - порядковый номер метода
+                int num = 0;
+                //просмотреть все методы класса
+                foreach (DataRow method in methods)
+                {
+                    num++;
+                    //занести в столбец А порядковый номер записи
+                    PutCellBorder("A" + i.ToString(), num.ToString());
+                    PutCellBorder("B" + i.ToString(), method["Название"].ToString());
+                    PutCellBorder("C" + i.ToString(), method["Описание"].ToString());
+                    i++;
+                }
+                //вывести количество записей в текущей группе
+                PutCell("A" + i.ToString(), "Итого: " + num.ToString());
+                //и отформатировать соответствующую ячейку
+                range = WorkSheet.get_Range("A" + i.ToString(), "C" + i.ToString());
+                range.Merge(Type.Missing);
+                range.Font.Italic = true;
+                range.BorderAround(Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous, Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin, Microsoft.Office.Interop.Excel.XlColorIndex.xlColorIndexAutomatic, Type.Missing);
+                i++;
+            }
+            //сделать приложение Excel видимым
+            ExcelApp.Visible = true;
+        }
     }
 }

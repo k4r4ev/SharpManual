@@ -35,7 +35,7 @@
                   </DbCommand>
                 </InsertCommand>
                 <SelectCommand>
-                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
                     <CommandText>SELECT Код, Название, Описание, Id_пространства FROM classes</CommandText>
                     <Parameters />
                   </DbCommand>
@@ -75,7 +75,7 @@
   <xs:element name="DatabaseDataSet2" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="True" msprop:Generator_DataSetName="DatabaseDataSet2" msprop:Generator_UserDSName="DatabaseDataSet2">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="classes" msprop:Generator_TableClassName="classesDataTable" msprop:Generator_TableVarName="tableclasses" msprop:Generator_TablePropName="classes" msprop:Generator_RowDeletingName="classesRowDeleting" msprop:Generator_RowChangingName="classesRowChanging" msprop:Generator_RowEvHandlerName="classesRowChangeEventHandler" msprop:Generator_RowDeletedName="classesRowDeleted" msprop:Generator_UserTableName="classes" msprop:Generator_RowChangedName="classesRowChanged" msprop:Generator_RowEvArgName="classesRowChangeEvent" msprop:Generator_RowClassName="classesRow">
+        <xs:element name="classes" msprop:Generator_TableClassName="classesDataTable" msprop:Generator_TableVarName="tableclasses" msprop:Generator_RowChangedName="classesRowChanged" msprop:Generator_TablePropName="classes" msprop:Generator_RowDeletingName="classesRowDeleting" msprop:Generator_RowChangingName="classesRowChanging" msprop:Generator_RowEvHandlerName="classesRowChangeEventHandler" msprop:Generator_RowDeletedName="classesRowDeleted" msprop:Generator_RowClassName="classesRow" msprop:Generator_UserTableName="classes" msprop:Generator_RowEvArgName="classesRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="Код" msdata:AutoIncrement="true" msdata:AutoIncrementSeed="-1" msdata:AutoIncrementStep="-1" msprop:Generator_ColumnVarNameInTable="columnКод" msprop:Generator_ColumnPropNameInRow="Код" msprop:Generator_ColumnPropNameInTable="КодColumn" msprop:Generator_UserColumnName="Код" type="xs:int" />
